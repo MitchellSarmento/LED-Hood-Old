@@ -13,7 +13,7 @@ BLEUart bleuart;
 
 // Effects control vars
 byte effectIndex = 0;
-#define numEffects 6
+#define numEffects 7
 
 // Brightness vars
 byte brightnessIndex = 0;
@@ -37,27 +37,14 @@ enum pattern {
   PHOTON,
   RAINBOW_PHOTON,
   ROLLING,
-  RAINBOW_ROLLING
+  RAINBOW_ROLLING,
+  SPARKLE
 };
 
 enum direction { FORWARD, REVERSE };
 
 class PixelStripPatterns : public PixelStrip
 {
-  //define pallet array, contains 32bit representations of all colors used in patterns
-  uint32_t pallet[9] = { off, white, UCLAGold, UCLABlue, blue, yellow, red, green, purple };
-  //                   { -0-, --1--, ---2----, ----3---, -4--, ---5--, -6-, --7--, --8-- }
-
-  //pallet to match typical fairy light colors
-  uint32_t christmasPallet[5] = { red, blue, green, yellow, purple };
-  
-  uint32_t pastelRainbowPallet[7] = { pastelRainbow, pastelRainbow1 , pastelRainbow2, pastelRainbow3, pastelRainbow4, pastelRainbow5, pastelRainbow6 };
-  byte pastelRainbowPattern[14] = {  6, 6, 1, 1, 2, 2, 5, 5, 4, 4, 3, 3, 0, 0 };
-  
-  uint32_t firePallet[3] = { red, ltOrange, ltYellow };
-  
-  uint32_t firePallet2[3] = { purple, pink, white };
-
   public:
     //-------------COLORS-----------------------------------------------COLORS
     //Define some colors we'll use frequently
@@ -137,6 +124,9 @@ class PixelStripPatterns : public PixelStrip
             break;
           case RAINBOW_ROLLING:
             RainbowRollingUpdate();
+            break;
+          case SPARKLE:
+            SparkleUpdate();
             break;
           default:
             break;
@@ -433,6 +423,56 @@ class PixelStripPatterns : public PixelStrip
       
       show();
       Increment();
+    }
+
+    // Initialize Sparkle Pattern.
+    void SparklePattern(uint8_t interval, direction dir = FORWARD)
+    {
+      ActivePattern = SPARKLE;
+      Interval = interval;
+      TotalSteps = 10922;
+      Index = 0;
+      Direction = dir;
+      ReverseWhenComplete = false;
+      Color1 = yellow;
+
+      fill(0, 0, numPixels());
+    }
+
+    // Update the Sparkle Pattern.
+    void SparkleUpdate()
+    {
+      uint32_t firePallet[3] = {red, ltOrange, ltYellow};
+      int sizeOfPallet = SIZE(firePallet);
+      
+      /*for(int i=0; i< numPixels(); i++)
+      {
+        //setPixelColor(i, firePallet[i % sizeOfPallet]);
+        //setPixelColor(i, Wheel(((i * 256 / numPixels()) + Index) & 255));
+        //setPixelColor(i, firePallet[(i + Index) % sizeOfPallet]);
+        //setPixelColor(i, Red(Wheel(((i * 256 / numPixels()) + Index))));
+        //setPixelColor(i, ColorHSV(
+      }*/
+      /*for (int i = 0; i < 10922; i++) {
+        setPixelColor(
+      }*/
+      /*for (int i = 0; i < numPixels(); i++) {
+        //setPixelColor(i, ColorHSV(i + Index, 255, brightnessLevels[brightnessIndex]));
+        //setPixelColor(i, ColorHSV(i + Index, 255, 255));
+        setPixelColor(i, ColorHSV(((i * 256 / numPixels()) + (Index * 100)) & 255));
+        show();
+      }*/
+      /*for (int i = 0; i < 10922; i++)
+      {
+        for (int j = 0; j < 20; j++)
+        {
+          setPixelColor(j, ColorHSV(i + (j * 10)));
+        }
+        show();
+      }*/
+      //show();
+      //Increment();
+      //delay(100);
     }
 
     // Calculate 50% dimmed version of a color (used by ScannerUpdate)
@@ -799,7 +839,7 @@ void loop() {
         case '7': {
           uint8_t n;
           switch (mode) {
-            case 'a': { n = 7; sendResponse("Changed to pattern 7."); break; }
+            case 'a': { n = 7; strip.SparklePattern(3); sendResponse("Changed to pattern 7."); break; }
             case 'b': { n = 17; sendResponse("Changed to pattern 17."); break; }
             case 'c': { n = 27; sendResponse("Changed to pattern 27."); break; }
             case 'd': { n = 37; sendResponse("Changed to pattern 37."); break; }
